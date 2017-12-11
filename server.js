@@ -12,16 +12,19 @@ app.get('/', function (req, res) {
 });
 
 const onlineUsers = {};
-let online = 1;
 
 io.on('connection', function (socket) {
-  onlineUsers[socket.handshake.sessionID] = socket.handshake.session;
-  online = Object.keys(onlineUsers).length;
-  socket.broadcast.emit('online', online);
+    socket.on('userInfo', userInfo => {
+        const { sessionID } = socket;
+        console.log('userInfo', userInfo);
 
-  socket.on('disconnect', function () {
-    delete onlineUsers[socket.handshake.sessionID];
-    online--;
-    socket.broadcast.emit('online', online);
-  });
+        onlineUsers[sessionID] = userInfo;
+        io.emit('onlineUsers', onlineUsers);
+    });
+
+    socket.on('disconnect', function () {
+        const { sessionID } = socket;
+        delete onlineUsers[sessionID];
+        io.emit('onlineUsers', onlineUsers);
+    });
 });
