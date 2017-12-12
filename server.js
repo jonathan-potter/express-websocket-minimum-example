@@ -2,6 +2,7 @@ var express = require('express')
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
+var { v4: uuid} = require('node-uuid');
 
 server.listen(3000);
 
@@ -11,20 +12,22 @@ app.get('/', function (req, res) {
   res.sendfile(__dirname + '/client/index.html');
 });
 
-const onlineUsers = {};
+const onlineUsers = new Map();
 
 io.on('connection', function (socket) {
     socket.on('userInfo', userInfo => {
-        const { sessionID } = socket;
         console.log('userInfo', userInfo);
+        console.log('socket', onlineUsers.get(socket))
 
-        onlineUsers[sessionID] = userInfo;
-        io.emit('onlineUsers', onlineUsers);
+        onlineUsers.set(socket, userInfo);
+        console.log('onlineUsers', Array.from(onlineUsers.values()))
+        io.emit('onlineUsers', Array.from(onlineUsers.values()));
     });
 
     socket.on('disconnect', function () {
-        const { sessionID } = socket;
-        delete onlineUsers[sessionID];
-        io.emit('onlineUsers', onlineUsers);
+        console.log('before', Array.from(onlineUsers.values()))
+        onlineUsers.delete(socket);
+        console.log('after', Array.from(onlineUsers.values()))
+        io.emit('onlineUsers', Array.from(onlineUsers.values()));
     });
 });

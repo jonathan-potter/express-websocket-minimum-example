@@ -14,14 +14,30 @@
         }, {})
     }
 
+    var socket = io();
+
     function something (userInfo) {
-        var socket = io();
         socket.on('connect', function () { console.log('connected') });
         socket.emit('userInfo', userInfo);
-        socket.on('onlineUsers', onlineUsers => console.log(onlineUsers));
+        socket.on('onlineUsers', users => {
+            const usersList = document.getElementById('users-list');
+            usersList.innerHTML = '';
+
+            users
+                .map(user => createLI(user.name))
+                .forEach(user => usersList.append(user))
+        });
         socket.on('online', function (data) { console.log('data', data) });
         socket.on('disconnect', function () { console.log('disconnected') });
 
+    }
+
+    function createLI (content) {
+        const li = document.createElement('li')
+
+        li.innerHTML = content
+
+        return li
     }
 
 
