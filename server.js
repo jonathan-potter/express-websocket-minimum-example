@@ -15,19 +15,21 @@ app.get('/', function (req, res) {
 const onlineUsers = new Map();
 
 io.on('connection', function (socket) {
+    console.log('connection initiated');
+
     socket.on('userInfo', userInfo => {
         console.log('userInfo', userInfo);
-        console.log('socket', onlineUsers.get(socket))
 
         onlineUsers.set(socket, userInfo);
-        console.log('onlineUsers', Array.from(onlineUsers.values()))
+
         io.emit('onlineUsers', Array.from(onlineUsers.values()));
     });
 
     socket.on('disconnect', function () {
-        console.log('before', Array.from(onlineUsers.values()))
+        console.log(onlineUsers.get(socket));
+
         onlineUsers.delete(socket);
-        console.log('after', Array.from(onlineUsers.values()))
+
         io.emit('onlineUsers', Array.from(onlineUsers.values()));
     });
 });

@@ -24,7 +24,7 @@
             usersList.innerHTML = '';
 
             users
-                .map(user => createLI(user.name))
+                .map(user => createElement({ type: 'li', content: user.name}))
                 .forEach(user => usersList.append(user))
         });
         socket.on('online', function (data) { console.log('data', data) });
@@ -32,27 +32,12 @@
 
     }
 
-    function createLI (content) {
-        const li = document.createElement('li')
+    function createElement ({ type, content }) {
+        const element = document.createElement(type)
 
-        li.innerHTML = content
+        element.innerHTML = content
 
-        return li
+        return element
     }
-
-
-    // const SOCKET_URL = `ws://${location.host}/ws`;
-
-
-    // const socket = new WebSocket(SOCKET_URL);
-    // window.socket = socket
-
-    // setInterval(() => {
-    //     socket.send('rawr');
-    // }, 5000);
-
-    // socket.addEventListener('message', event => {
-    //     console.log(event.data)
-    // });
 
 })();
