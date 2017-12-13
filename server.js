@@ -2,32 +2,29 @@ var express = require('express')
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
-var { v4: uuid} = require('node-uuid');
 
 server.listen(3000);
 
-app.use('/client', express.static('client'))
-
-app.get('/', function (req, res) {
-  res.sendfile(__dirname + '/client/index.html');
-});
+app.use('/client/build', express.static('client/build'))
 
 const onlineUsers = new Map();
 
 io.on('connection', function (socket) {
+    console.log('connection initiated');
+
     socket.on('userInfo', userInfo => {
         console.log('userInfo', userInfo);
-        console.log('socket', onlineUsers.get(socket))
 
         onlineUsers.set(socket, userInfo);
-        console.log('onlineUsers', Array.from(onlineUsers.values()))
+
         io.emit('onlineUsers', Array.from(onlineUsers.values()));
     });
 
     socket.on('disconnect', function () {
-        console.log('before', Array.from(onlineUsers.values()))
+        console.log(onlineUsers.get(socket));
+
         onlineUsers.delete(socket);
-        console.log('after', Array.from(onlineUsers.values()))
+
         io.emit('onlineUsers', Array.from(onlineUsers.values()));
     });
 });
