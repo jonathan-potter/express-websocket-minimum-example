@@ -5,19 +5,34 @@ var io = require('socket.io')(server);
 
 server.listen(3000);
 
-app.use('/client/build', express.static('client/build'))
-
 const onlineUsers = new Map();
 
 io.on('connection', function (socket) {
     console.log('connection initiated');
 
-    socket.on('userInfo', userInfo => {
-        console.log('userInfo', userInfo);
+    socket.on('joinRooms', rooms => {
+        console.log('rooms joined', rooms)
+        socket.join(rooms)
+    })
+
+    socket.on('addUser', userInfo => {
+        console.log('addUser', userInfo);
+
+        socket.join(userInfo.room);
+        socket.room = userInfo.room
 
         onlineUsers.set(socket, userInfo);
 
-        io.emit('onlineUsers', Array.from(onlineUsers.values()));
+        socket.to(socket.room).emit('setUsers', Array.from(onlineUsers.values()));
+    });
+
+    socket.on('sendMessage', ({ room, message }) => {
+        console.log('message', message);
+
+        const rooms = Object.keys(socket.rooms)
+        console.log('rooms', Object.keys(socket.rooms));
+
+        io.to(room).emit('message', { room, message });
     });
 
     socket.on('disconnect', function () {
@@ -25,6 +40,6 @@ io.on('connection', function (socket) {
 
         onlineUsers.delete(socket);
 
-        io.emit('onlineUsers', Array.from(onlineUsers.values()));
+        socket.emit('setUsers', Array.from(onlineUsers.values()));
     });
 });

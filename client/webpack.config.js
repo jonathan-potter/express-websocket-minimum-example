@@ -1,6 +1,5 @@
 const path = require('path')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const webpack = require('webpack')
 
 module.exports = {
   entry: './javascript/index',
@@ -13,8 +12,12 @@ module.exports = {
     extensions: ['.js', '.jsx'],
     alias: {
       /* eslint-disable key-spacing */
-      css: path.resolve(__dirname, 'css'),
-      javascript: path.resolve(__dirname, 'javascript')
+      css:        path.resolve(__dirname, 'css'),
+      javascript: path.resolve(__dirname, 'javascript'),
+      actions:    path.resolve(__dirname, 'javascript', 'actions'),
+      components: path.resolve(__dirname, 'javascript', 'components'),
+      utility:    path.resolve(__dirname, 'javascript', 'utility'),
+      reducers:   path.resolve(__dirname, 'javascript', 'reducers')
       /* eslint-enable key-spacing */
     }
   },

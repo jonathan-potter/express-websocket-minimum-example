@@ -1,41 +1,23 @@
+import React from 'react'
+import ReactDOM from 'react-dom'
+import Root from 'components'
+import configureStore from 'utility/configureStore'
+import socket from 'utility/configureWebsockets'
 import 'css/app.scss'
-import io from 'socket.io-client'
 
-window.addEventListener('submit', event => {
-    event.preventDefault()
-    const inputs = event.srcElement.getElementsByTagName('input')
-    const query = getQuery(inputs)
-    connect(query)
+const store = configureStore()
+
+socket.on('setUsers', users => {
+  store.dispatch({
+    type: 'SET_USERS',
+    value: users
+  })
 })
 
-function getQuery (inputs) {
-    return Array.from(inputs).reduce((query, input) => {
-        query[input.name] = input.value
-        return query
-    }, {})
-}
+socket.on('message', message => {
+  console.log(message)
+})
 
-var socket = io('http://localhost:3000')
+window.store = store
 
-function connect (userInfo) {
-    socket.on('connect', function () { console.log('connected') })
-    socket.emit('userInfo', userInfo)
-    socket.on('onlineUsers', users => {
-        const usersList = document.getElementById('users-list')
-        usersList.innerHTML = ''
-
-        users
-            .map(user => createElement({ type: 'li', content: user.name}))
-            .forEach(user => usersList.append(user))
-    })
-    socket.on('online', function (data) { console.log('data', data) })
-    socket.on('disconnect', function () { console.log('disconnected') })
-}
-
-function createElement ({ type, content }) {
-    const element = document.createElement(type)
-
-    element.innerHTML = content
-
-    return element
-}
+ReactDOM.render(<Root store={store} />, document.getElementById('react-container'))
