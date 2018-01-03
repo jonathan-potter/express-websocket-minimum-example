@@ -15,6 +15,10 @@ socket.on('setUsers', users => {
 })
 
 socket.on('message', store.dispatch.bind(store))
+socket.on('ADD_MESSAGES', messages => store.dispatch({
+  type: 'ADD_MESSAGES',
+  value: messages
+}))
 
 window.store = store
 

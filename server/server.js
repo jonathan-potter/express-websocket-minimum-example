@@ -5,14 +5,17 @@ var io = require('socket.io')(server);
 
 server.listen(3000);
 
-const onlineUsers = new Map();
+const onlineUsers = new Map()
+const messages = []
 
 io.on('connection', function (socket) {
-    console.log('connection initiated');
+    console.log('connection initiated')
 
     socket.on('joinRooms', rooms => {
         console.log('rooms joined', rooms)
         socket.join(rooms)
+
+        socket.emit('ADD_MESSAGES', messages)
     })
 
     socket.on('addUser', userInfo => {
@@ -29,8 +32,7 @@ io.on('connection', function (socket) {
     socket.on('sendMessage', (message) => {
         console.log('message', message);
 
-        const rooms = Object.keys(socket.rooms)
-        console.log('rooms', Object.keys(socket.rooms));
+        handleMessage(message)
 
         io.to(message.room).emit('message', message);
     });
@@ -45,3 +47,10 @@ io.on('connection', function (socket) {
         })
     });
 });
+
+function handleMessage (message) {
+    switch(message.type) {
+        case 'ADD_MESSAGE':
+            messages.push(message)
+    }
+}

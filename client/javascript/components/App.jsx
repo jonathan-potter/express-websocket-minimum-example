@@ -64,7 +64,7 @@ class App extends Component {
   renderMessages (messages) {
     return messages.map((message, index) => (
       <li key={index}>
-        <b>{message.name}:</b>
+        <b>{message.name}: </b>
         <span>{message.message}</span>
       </li>
     ))
