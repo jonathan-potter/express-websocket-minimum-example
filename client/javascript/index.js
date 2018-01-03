@@ -14,9 +14,7 @@ socket.on('setUsers', users => {
   })
 })
 
-socket.on('message', message => {
-  console.log(message)
-})
+socket.on('message', store.dispatch.bind(store))
 
 window.store = store
 

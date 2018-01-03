@@ -2,13 +2,14 @@ import { loadState, saveState } from 'utility/localStorage'
 import rootReducer from 'reducers'
 
 import { applyMiddleware, createStore } from 'redux'
+import { createLogger } from 'redux-logger'
 import throttle from 'lodash/throttle'
 import thunk from 'redux-thunk'
 
 const CURRENT_VERSION = '0.0.1'
 
 export default function configureStore () {
-  const middlewares = [thunk]
+  const middlewares = [thunk, createLogger()]
 
   const initialState = loadState()
 
@@ -25,13 +26,13 @@ export default function configureStore () {
     store = createStore(rootReducer, applyMiddleware(...middlewares))
   }
 
-  store.subscribe(throttle(() => {
-    const state = store.getState()
-
-    saveState({
-      version: CURRENT_VERSION
-    })
-  }, 1000))
+  // store.subscribe(throttle(() => {
+  //   const state = store.getState()
+  //
+  //   saveState({
+  //     version: CURRENT_VERSION
+  //   })
+  // }, 1000))
 
   return store
 }

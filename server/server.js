@@ -18,21 +18,21 @@ io.on('connection', function (socket) {
     socket.on('addUser', userInfo => {
         console.log('addUser', userInfo);
 
-        socket.join(userInfo.room);
-        socket.room = userInfo.room
-
         onlineUsers.set(socket, userInfo);
+        console.log(socket.rooms)
 
-        socket.to(socket.room).emit('setUsers', Array.from(onlineUsers.values()));
+        Object.values(socket.rooms).forEach(room => {
+            io.to(room).emit('setUsers', Array.from(onlineUsers.values()));
+        })
     });
 
-    socket.on('sendMessage', ({ room, message }) => {
+    socket.on('sendMessage', (message) => {
         console.log('message', message);
 
         const rooms = Object.keys(socket.rooms)
         console.log('rooms', Object.keys(socket.rooms));
 
-        io.to(room).emit('message', { room, message });
+        io.to(message.room).emit('message', message);
     });
 
     socket.on('disconnect', function () {
@@ -40,6 +40,8 @@ io.on('connection', function (socket) {
 
         onlineUsers.delete(socket);
 
-        socket.emit('setUsers', Array.from(onlineUsers.values()));
+        Object.values(socket.rooms).forEach(room => {
+            io.to(room).emit('setUsers', Array.from(onlineUsers.values()));
+        })
     });
 });

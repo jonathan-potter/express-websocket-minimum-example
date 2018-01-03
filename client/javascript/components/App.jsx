@@ -2,47 +2,55 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import * as actions from 'actions'
 
-const mapStateToProps = ({ onlineUsers }) => ({
-  loginUser: actions.loginUser,
+const mapStateToProps = ({ messages, onlineUsers }) => ({
+  ...actions,
+  messages,
   onlineUsers
 })
 
 class App extends Component {
-  onSubmit = event => {
-    const { loginUser } = this.props
+  onChange (callback) {
+    return event => {
+      const inputs = [event.target]
+      const query = getQuery(inputs)
 
-    event.preventDefault()
-    const inputs = event.target.getElementsByTagName('input')
-    const query = getQuery(inputs)
-    loginUser(query)
+      return callback(query)
+    }
   }
 
-  onMessage = event => {
-    const { sendMessage } = this.props
+  onSubmit (callback) {
+    return event => {
+      event.preventDefault()
 
-    event.preventDefault()
-    const inputs = event.target.getElementsByTagName('input')
-    const query = getQuery(inputs)
-    sendMessage(query)
+      const inputs = event.target.getElementsByTagName('input')
+      const query = getQuery(inputs)
+
+      return callback(query)
+    }
   }
 
   render () {
-    const { onlineUsers } = this.props
+    const { loginUser, messages, onlineUsers, sendMessage } = this.props
 
     return (
       <div>
-        <ul id='users-list'>
-          { this.renderUsers(onlineUsers) }
-        </ul>
-        <form onSubmit={this.onSubmit}>
-          <input id="name-input" name="name" placeholder="name"></input>
-          <button>submit</button>
-        </form>
-        <form onSubmit={this.onMessage}>
+        <form onSubmit={ this.onSubmit(sendMessage) }>
+          <label htmlFor="name">Name</label>
+          <input id="name-input" name="name" placeholder="name" onChange={ this.onChange(loginUser) }></input>
+          <label htmlFor="room">Room</label>
           <input id="room-input" name="room" placeholder="room"></input>
+          <label htmlFor="message">Message</label>
           <input id="message-input" name="message" placeholder="message"></input>
           <button>submit</button>
         </form>
+        <h3>Online Users</h3>
+        <ul>
+          { this.renderUsers(onlineUsers) }
+        </ul>
+        <h3>Messages</h3>
+        <ul>
+          { this.renderMessages(messages) }
+        </ul>
       </div>
     )
   }
@@ -50,6 +58,15 @@ class App extends Component {
   renderUsers (users) {
     return users.map((user, index) => (
       <li key={index}>{user.name}</li>
+    ))
+  }
+
+  renderMessages (messages) {
+    return messages.map((message, index) => (
+      <li key={index}>
+        <b>{message.name}:</b>
+        <span>{message.message}</span>
+      </li>
     ))
   }
 }
