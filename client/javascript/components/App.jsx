@@ -2,10 +2,10 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import * as actions from 'actions'
 
-const mapStateToProps = ({ messages, onlineUsers }) => ({
-  ...actions,
+const mapStateToProps = ({ messages, onlineUsers, user }) => ({
   messages,
-  onlineUsers
+  onlineUsers,
+  user
 })
 
 class App extends Component {
@@ -30,13 +30,13 @@ class App extends Component {
   }
 
   render () {
-    const { loginUser, messages, onlineUsers, sendMessage } = this.props
+    const { loginUser, messages, onlineUsers, sendMessage, user } = this.props
 
     return (
       <div>
         <form onSubmit={ this.onSubmit(sendMessage) }>
           <label htmlFor="name">Name</label>
-          <input id="name-input" name="name" placeholder="name" onChange={ this.onChange(loginUser) }></input>
+          <input id="name-input" name="name" placeholder="name" onChange={ this.onChange(loginUser) } value={user.name}></input>
           <label htmlFor="room">Room</label>
           <input id="room-input" name="room" placeholder="room"></input>
           <label htmlFor="message">Message</label>
@@ -62,12 +62,20 @@ class App extends Component {
   }
 
   renderMessages (messages) {
-    return messages.map((message, index) => (
-      <li key={index}>
-        <b>{message.name}: </b>
-        <span>{message.message}</span>
-      </li>
-    ))
+    return messages.map((message, index) => {
+      if (message.timestampCursor) {
+        return (
+          <li key={index}><hr /></li>
+        )
+      } else {
+        return (
+          <li key={index}>
+            <b>{message.name}: </b>
+            <span>{message.message}</span>
+          </li>
+        )
+      }
+    })
   }
 }
 

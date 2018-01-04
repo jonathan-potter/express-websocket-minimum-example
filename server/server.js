@@ -2,9 +2,11 @@ var express = require('express')
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
+var { v4: uuid } = require('node-uuid');
 
 server.listen(3000);
 
+const users = {}
 const onlineUsers = new Map()
 const messages = []
 
@@ -19,26 +21,41 @@ io.on('connection', function (socket) {
     })
 
     socket.on('addUser', userInfo => {
-        console.log('addUser', userInfo);
+        let user = users[userInfo.name]
 
-        onlineUsers.set(socket, userInfo);
-        console.log(socket.rooms)
+        if (!user) {
+            user = userInfo
+            user.id = uuid()
+            users[user.name] = user
+        }
+
+        console.log('addUser', user);
+
+        onlineUsers.set(socket, user)
+
+        socket.emit('updateUser', user)
 
         Object.values(socket.rooms).forEach(room => {
             io.to(room).emit('setUsers', Array.from(onlineUsers.values()));
         })
     });
 
-    socket.on('sendMessage', (message) => {
+    socket.on('sendCommand', (message) => {
         console.log('message', message);
 
+        message.timestamp = new Date()
         handleMessage(message)
 
-        io.to(message.room).emit('message', message);
+        io.to(message.room).emit('recieveCommand', message);
     });
 
     socket.on('disconnect', function () {
-        console.log(onlineUsers.get(socket));
+        console.log('DISCONNECT');
+
+        const user = onlineUsers.get(socket);
+        if (users && user && users[user.name]) {
+            users[user.name].timestamp = new Date() // last seen
+        }
 
         onlineUsers.delete(socket);
 
