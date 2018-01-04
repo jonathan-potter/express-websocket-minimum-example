@@ -67,11 +67,17 @@ class App extends Component {
         return (
           <li key={index}><hr /></li>
         )
+      } else if (message.startupTime) {
+        return (
+          <li key={index}><hr /></li>
+        )
       } else {
         return (
           <li key={index}>
             <b>{message.name}: </b>
             <span>{message.message}</span>
+            <b> timestamp: </b>
+            <span>{message.timestamp}</span>
           </li>
         )
       }

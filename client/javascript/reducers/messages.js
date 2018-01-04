@@ -1,6 +1,9 @@
-const DEFAULT_STATE = []
+const DEFAULT_STATE = [{
+  timestamp: JSON.stringify(new Date()).replace('"', ''),
+  startupTime: true
+}]
 
-const timestampSorter = (a, b) => a.timestamp > b.timestamp
+const timestampComparator = (a, b) => a.timestamp > b.timestamp ? 1 : -1
 
 export default function (state = DEFAULT_STATE, action) {
   const { type, ...value } = action
@@ -10,16 +13,16 @@ export default function (state = DEFAULT_STATE, action) {
       return state
         .filter(message => !message.timestampCursor)
         .concat({ ...action.value, timestampCursor: true })
-        .sort(timestampSorter)
+        .sort(timestampComparator)
     case `ADD_MESSAGE`:
       return [
         ...state,
         value
-      ].sort(timestampSorter)
+      ].sort(timestampComparator)
     case `ADD_MESSAGES`:
       return action.value
         .concat(state)
-        .sort(timestampSorter)
+        .sort(timestampComparator)
     case 'RESET':
       return DEFAULT_STATE
     default:
