@@ -1,9 +1,9 @@
 const DEFAULT_STATE = [{
-  timestamp: JSON.stringify(new Date()).replace('"', ''),
+  timestamp: new Date(),
   startupTime: true
 }]
 
-const timestampComparator = (a, b) => a.timestamp > b.timestamp ? 1 : -1
+const timestampComparator = (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
 
 export default function (state = DEFAULT_STATE, action) {
   const { type, ...value } = action
