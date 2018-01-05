@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import queryString from 'query-string'
 import * as actions from 'actions'
+
+const { location } = window
 
 const mapStateToProps = ({ messages, onlineUsers, user }) => ({
   messages,
@@ -9,6 +12,15 @@ const mapStateToProps = ({ messages, onlineUsers, user }) => ({
 })
 
 class App extends Component {
+  componentDidMount () {
+    const { loginUser, joinRooms } = this.props
+
+    const { name, rooms } = queryString.parse(location.search)
+
+    joinRooms(rooms)
+    loginUser({ name })
+  }
+
   onChange (callback) {
     return event => {
       const inputs = [event.target]
@@ -31,6 +43,8 @@ class App extends Component {
 
   render () {
     const { loginUser, messages, onlineUsers, sendMessage, user } = this.props
+
+    if (!user) { return <div /> }
 
     return (
       <div>

@@ -11,45 +11,16 @@ const onlineUsers = new Map()
 const messages = []
 
 io.on('connection', function (socket) {
-    console.log('connection initiated')
+    console.log('DISCONNECT')
 
-    socket.on('joinRooms', rooms => {
-        console.log('rooms joined', rooms)
-        socket.join(rooms)
+    socket.on('sendCommand', (command) => {
+        console.log('command', command);
 
-        socket.emit('ADD_MESSAGES', messages)
-    })
-
-    socket.on('addUser', userInfo => {
-        let user = users[userInfo.name]
-
-        if (!user) {
-            user = userInfo
-            user.id = uuid()
-            users[user.name] = user
-        }
-
-        console.log('addUser', user);
-
-        onlineUsers.set(socket, user)
-
-        socket.emit('updateUser', user)
-
-        Object.values(socket.rooms).forEach(room => {
-            io.to(room).emit('setUsers', Array.from(onlineUsers.values()));
-        })
+        command.timestamp = new Date()
+        handleCommand(command, socket)
     });
 
-    socket.on('sendCommand', (message) => {
-        console.log('message', message);
-
-        message.timestamp = new Date()
-        handleMessage(message)
-
-        io.to(message.room).emit('recieveCommand', message);
-    });
-
-    socket.on('disconnect', function () {
+    socket.on('disconnecting', function () {
         console.log('DISCONNECT');
 
         const user = onlineUsers.get(socket);
@@ -59,15 +30,59 @@ io.on('connection', function (socket) {
 
         onlineUsers.delete(socket);
 
-        Object.values(socket.rooms).forEach(room => {
-            io.to(room).emit('setUsers', Array.from(onlineUsers.values()));
+        sendCommandToRooms(Object.values(socket.rooms), {
+            type: 'SET_USERS',
+            value: Array.from(onlineUsers.values())
         })
     });
 });
 
-function handleMessage (message) {
-    switch(message.type) {
-        case 'ADD_MESSAGE':
+function handleCommand (command, socket) {
+    const rooms = Object.values(socket.rooms)
+
+    switch(command.type) {
+        case 'SET_USER': {
+            const userInfo = command.value
+            let user = users[userInfo.name]
+
+            if (!user) {
+                user = userInfo
+                user.id = uuid()
+                users[user.name] = user
+            }
+
+            onlineUsers.set(socket, user)
+
+            socket.emit('recieveCommand', Object.assign(command, { value: user }))
+            sendCommandToRooms(rooms, {
+                type: 'SET_USERS',
+                value: Array.from(onlineUsers.values())
+            })
+            break;
+        }
+        case 'JOIN_ROOMS': {
+            socket.join(command.value)
+
+            socket.emit('recieveCommand', {
+                type: 'ADD_MESSAGES',
+                value: messages
+            });
+            break;
+        }
+        case 'ADD_MESSAGE': {
+            const message = command.value
+
+            message.timestamp = command.timestamp
             messages.push(message)
+
+            sendCommandToRooms([message.room], command)
+            break;
+        }
     }
+}
+
+function sendCommandToRooms (rooms, command) {
+    rooms.forEach(room => {
+        io.to(room).emit('recieveCommand', command)
+    })
 }
