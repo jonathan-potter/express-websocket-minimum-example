@@ -13,7 +13,7 @@ const messages = []
 io.on('connection', function (socket) {
     console.log('DISCONNECT')
 
-    socket.on('sendCommand', (command) => {
+    socket.on('sendCommandToServer', (command) => {
         console.log('command', command);
 
         command.timestamp = new Date()
@@ -53,7 +53,7 @@ function handleCommand (command, socket) {
 
             onlineUsers.set(socket, user)
 
-            socket.emit('recieveCommand', Object.assign(command, { value: user }))
+            socket.emit('sendCommandToClient', Object.assign(command, { value: user }))
             sendCommandToRooms(rooms, {
                 type: 'SET_USERS',
                 value: Array.from(onlineUsers.values())
@@ -63,7 +63,7 @@ function handleCommand (command, socket) {
         case 'JOIN_ROOMS': {
             socket.join(command.value)
 
-            socket.emit('recieveCommand', {
+            socket.emit('sendCommandToClient', {
                 type: 'ADD_MESSAGES',
                 value: messages
             });
@@ -83,6 +83,6 @@ function handleCommand (command, socket) {
 
 function sendCommandToRooms (rooms, command) {
     rooms.forEach(room => {
-        io.to(room).emit('recieveCommand', command)
+        io.to(room).emit('sendCommandToClient', command)
     })
 }

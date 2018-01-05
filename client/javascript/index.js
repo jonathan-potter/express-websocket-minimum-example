@@ -11,6 +11,6 @@ const store = configureStore()
 window.store = store
 
 const { recieveCommand } = bindActionCreators(actions, store.dispatch)
-socket.on('recieveCommand', command => recieveCommand(command))
+socket.on('sendCommandToClient', command => recieveCommand(command))
 
 ReactDOM.render(<Root store={store} />, document.getElementById('react-container'))
