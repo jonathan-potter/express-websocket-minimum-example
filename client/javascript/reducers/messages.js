@@ -25,6 +25,9 @@ export default function (state = DEFAULT_STATE, action) {
         .sort(timestampComparator)
     case 'RESET':
       return DEFAULT_STATE
+    case 'LOG':
+      console.log(action.value)
+      return state
     default:
       return state
   }

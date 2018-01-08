@@ -10,6 +10,19 @@ const users = {}
 const onlineUsers = new Map()
 const messages = []
 
+app.post('/webhooks/webhook1', (req, res) => {
+    console.log('post', 'webhook');
+    io.emit('sendCommandToClient', {
+        type: 'ADD_MESSAGE',
+        value: {
+            name: 'JIRA',
+            message: 'something happened with an issue',
+            timestamp: new Date()
+        }
+    });
+    res.send('rawr')
+});
+
 io.on('connection', function (socket) {
     console.log('CONNECT')
 
@@ -61,7 +74,7 @@ function handleCommand (command, socket) {
             break;
         }
         case 'JOIN_ROOMS': {
-            socket.join(command.value)
+            socket.join(command.value.split(','))
 
             socket.emit('sendCommandToClient', {
                 type: 'ADD_MESSAGES',
