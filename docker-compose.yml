@@ -1,0 +1,6 @@
+version: "2"
+
+services:
+  socket-proxy:
+    image: gliffy/proxy
+    container_name: socket-proxy

@@ -11,7 +11,7 @@ const onlineUsers = new Map()
 const messages = []
 
 io.on('connection', function (socket) {
-    console.log('DISCONNECT')
+    console.log('CONNECT')
 
     socket.on('sendCommandToServer', (command) => {
         console.log('command', command);

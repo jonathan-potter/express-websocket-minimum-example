@@ -1,0 +1,11 @@
+version: "2"
+
+services:
+  socket-proxy:
+    environment:
+      # make sure this is set in your local .env file
+      - MAC_HOST=${MAC_HOST}
+    volumes:
+      - ./conf.nginx:/etc/nginx/conf.nginx
+    ports:
+      - 80:80
